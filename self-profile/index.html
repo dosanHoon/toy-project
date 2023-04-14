@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>2D 캐릭터 움직이기</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <script>
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // 캔버스 영역 표시
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+      // 캐릭터 생성
+      const character = {
+        x: 50,
+        y: 50,
+        width: 50,
+        height: 50,
+        speed: 5,
+        moving: false,
+        targetX: 0,
+        targetY: 0,
+      };
+
+      // 캔버스에 캐릭터 그리기
+      function drawCharacter() {
+        ctx.fillStyle = "blue";
+        ctx.fillRect(
+          character.x,
+          character.y,
+          character.width,
+          character.height
+        );
+      }
+
+      // 캐릭터 이동
+      function moveCharacter() {
+        const distanceX = character.targetX - character.x;
+        const distanceY = character.targetY - character.y;
+        const distance = Math.sqrt(
+          distanceX * distanceX + distanceY * distanceY
+        );
+        const directionX = distanceX / distance;
+        const directionY = distanceY / distance;
+        if (distance > character.speed) {
+          character.x += directionX * character.speed;
+          character.y += directionY * character.speed;
+        } else {
+          character.x = character.targetX;
+          character.y = character.targetY;
+          character.moving = false;
+        }
+      }
+
+      // 캔버스 클릭 시 캐릭터 이동
+      canvas.addEventListener("click", function (event) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+        if (
+          mouseX >= 0 &&
+          mouseX <= canvas.width &&
+          mouseY >= 0 &&
+          mouseY <= canvas.height
+        ) {
+          character.targetX = mouseX;
+          character.targetY = mouseY;
+          character.moving = true;
+        }
+      });
+
+      // 게임 루프
+      function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        if (character.moving) {
+          moveCharacter();
+        }
+        drawCharacter();
+        requestAnimationFrame(gameLoop);
+      }
+      gameLoop();
+    </script>
+  </body>
+</html>
