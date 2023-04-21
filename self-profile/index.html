@@ -14,6 +14,13 @@
       ctx.strokeStyle = "black";
       ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
+      //캔버스에 이미지 불러오기
+      const image = new Image();
+      image.src = "./public/character.jpg";
+      image.onload = function () {
+        ctx.drawImage(image, 0, 0, 100, 100);
+      };
+
       // 캐릭터 생성
       const character = {
         x: 50,
@@ -26,10 +33,62 @@
         targetY: 0,
       };
 
+      // 캔버스에 텍스트 그리기
+      function drawText() {
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillText("움직이는 중!", 10, 50);
+      }
+
+      //장애물 class 생성
+      class Obstacle {
+        constructor(x, y, width, height) {
+          this.x = x;
+          this.y = y;
+          this.width = width;
+          this.height = height;
+          this.text = "장애물";
+        }
+        draw() {
+          ctx.fillStyle = "red";
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+        drawText() {
+          ctx.fillStyle = "black";
+          ctx.font = "20px Arial";
+          ctx.fillText(this.text, this.x, this.y);
+        }
+      }
+
+      const 장애물1 = new Obstacle(200, 200, 50, 50);
+
+      //Obstacle character 충돌 감지
+      function isCollided(character, obstacle) {
+        if (
+          character.x + character.width > obstacle.x &&
+          character.x < obstacle.x + obstacle.width &&
+          character.y + character.height > obstacle.y &&
+          character.y < obstacle.y + obstacle.height
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      const obstacle = {
+        x: 200,
+        y: 200,
+        width: 50,
+        height: 50,
+      };
+
       // 캔버스에 캐릭터 그리기
       function drawCharacter() {
         ctx.fillStyle = "blue";
-        ctx.fillRect(
+
+        ctx.drawImage(
+          image,
           character.x,
           character.y,
           character.width,
@@ -79,7 +138,12 @@
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
         if (character.moving) {
           moveCharacter();
+          drawText();
         }
+        if (isCollided(character, 장애물1)) {
+          장애물1.drawText();
+        }
+        장애물1.draw();
         drawCharacter();
         requestAnimationFrame(gameLoop);
       }
