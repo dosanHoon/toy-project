@@ -1,23 +1,21 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, RefObject, memo, useEffect, useRef, useState } from "react";
 import { styled } from "styled-components";
 
-//return to parent component
-// const callback = (entries: IntersectionObserverEntry[]) => {
-
-export const ListItem: FC<{ children: string }> = ({ children }) => {
-  const liRef = useRef<HTMLLIElement>(null);
-  const [isRendered, setIsRendered] = useState(false);
+export const ListItem: FC<{
+  children: string;
+  viewPortRef: RefObject<HTMLDivElement>;
+}> = memo(({ children, viewPortRef }) => {
+  const liRef = useRef<HTMLDivElement>(null);
   const [isIntersecting, setIsIntersecting] = useState(true);
 
   useEffect(() => {
     let options = {
-      root: null,
-      rootMargin: "0px",
+      root: viewPortRef.current,
+      rootMargin: "200px",
       threshold: 1.0,
     };
     const callback = (entries: any) => {
-      console.log("entries", entries);
-      setIsIntersecting(entries[0].isIntersecting);
+      requestAnimationFrame(() => setIsIntersecting(entries[0].isIntersecting));
     };
     let observer = new IntersectionObserver(callback, options);
     if (liRef.current) {
@@ -26,16 +24,22 @@ export const ListItem: FC<{ children: string }> = ({ children }) => {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [viewPortRef]);
 
   return (
-    <>{isIntersecting && <StyledItem ref={liRef}>{children}</StyledItem>}</>
+    <Container ref={liRef}>
+      {isIntersecting && <StyledItem>{children}</StyledItem>}
+    </Container>
   );
-};
+});
+
+const Container = styled.div`
+  width: 200px;
+  height: 200px;
+`;
 
 const StyledItem = styled.li`
-  height: 100px;
-  width: 100px;
+  height: 200px;
   background-color: white;
   border: 1px solid black;
 `;
