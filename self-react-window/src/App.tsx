@@ -1,11 +1,11 @@
 import "./App.css";
-import { List } from "./components/List";
+import { ViewPortList } from "./components/ViewPortList";
 
 function App() {
   const items = Array.from(Array(1000)).map((_, i) => `Item ${i}`);
   return (
     <div className="App">
-      <List items={items} />
+      <ViewPortList items={items} />
     </div>
   );
 }
