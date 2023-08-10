@@ -6,6 +6,36 @@ interface ListProps {
   items: string[];
 }
 
+function throttle<T extends (...args: any[]) => any>(fn: T, wait: number): T {
+  let inThrottle: boolean = false;
+  let lastFn: ReturnType<typeof setTimeout> | null = null;
+  let lastTime: number = Date.now();
+
+  return function (
+    this: ThisParameterType<T>,
+    ...args: Parameters<T>
+  ): ReturnType<T> | void {
+    const context = this;
+
+    if (!inThrottle) {
+      fn.apply(context, args);
+      lastTime = Date.now();
+      inThrottle = true;
+    } else {
+      if (lastFn) {
+        clearTimeout(lastFn);
+      }
+
+      lastFn = setTimeout(() => {
+        if (Date.now() - lastTime >= wait) {
+          fn.apply(context, args);
+          lastTime = Date.now();
+        }
+      }, wait - (Date.now() - lastTime));
+    }
+  } as T;
+}
+
 export const List: FC<ListProps> = ({ items }) => {
   const listRef = useRef<HTMLUListElement>(null);
   const viewPortRef = useRef<HTMLDivElement>(null);
@@ -34,31 +64,30 @@ export const List: FC<ListProps> = ({ items }) => {
     const viewPort = viewPortRef.current;
     const listCurrent = listRef.current;
     if (viewPort) {
-      viewPort.addEventListener("scroll", () => {
-        if (listCurrent && viewPort) {
-          const scrollTop = viewPort.scrollTop;
-          const listHeight = listCurrent.clientHeight;
+      viewPort.addEventListener("scroll", () =>
+        requestAnimationFrame(() => {
+          if (listCurrent && viewPort) {
+            const scrollTop = viewPort.scrollTop;
+            const listHeight = listCurrent.clientHeight;
 
-          const [startIndex, endIndex] = getIndex(scrollTop, listHeight);
-          setStartIndex(startIndex);
-          setEndIndex(endIndex);
-        }
-      });
+            const [startIndex, endIndex] = getIndex(scrollTop, listHeight);
+            console.log(startIndex, endIndex);
+            setStartIndex(startIndex - 2);
+            setEndIndex(endIndex + 2);
+          }
+        })
+      );
     }
   }, [viewPortRef, listRef, items, setStartIndex, setEndIndex, getIndex]);
 
   return (
     <Container ref={viewPortRef}>
       <StyledList ref={listRef}>
-        {items.map(
-          (item, index) =>
-            index >= startIndex &&
-            index <= endIndex && (
-              <ListItem key={item} viewPortRef={viewPortRef}>
-                {item}
-              </ListItem>
-            )
-        )}
+        {items
+          .filter((_, index) => index >= startIndex && index <= endIndex)
+          .map((item, index) => (
+            <ListItem key={item}>{item}</ListItem>
+          ))}
       </StyledList>
     </Container>
   );
