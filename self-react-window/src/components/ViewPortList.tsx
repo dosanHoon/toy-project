@@ -1,22 +1,32 @@
-import { FC, useEffect, useRef, useState } from "react";
-import { ListItem } from "./ListItem";
+import { FC, cloneElement, useEffect, useRef, useState } from "react";
 import { styled } from "styled-components";
 
 interface ListProps {
   items: string[];
+  width?: number;
+  height?: number;
+  itemHeight?: number;
+  children: React.ReactElement;
 }
 
 function getIndex(
   scrollTop: number,
   listHeight: number,
   length: number,
-  viewSize: number
+  viewSize: number,
+  itemHeight: number
 ) {
   const startIndex = Math.floor((scrollTop / listHeight) * length);
-  return [startIndex, startIndex + 1 + viewSize / 200];
+  return [startIndex, startIndex + 1 + viewSize / itemHeight];
 }
 
-export const ViewPortList: FC<ListProps> = ({ items }) => {
+export const ViewPortList: FC<ListProps> = ({
+  items,
+  width,
+  height,
+  itemHeight = 200,
+  children,
+}) => {
   const listRef = useRef<HTMLUListElement>(null);
   const viewPortRef = useRef<HTMLDivElement>(null);
 
@@ -25,7 +35,7 @@ export const ViewPortList: FC<ListProps> = ({ items }) => {
 
   useEffect(() => {
     if (listRef.current) {
-      listRef.current.style.height = 200 * items.length + "px";
+      listRef.current.style.height = itemHeight * items.length + "px";
     }
   }, []);
 
@@ -36,7 +46,8 @@ export const ViewPortList: FC<ListProps> = ({ items }) => {
         scrollTop,
         listHeight,
         items.length,
-        viewPortRef.current?.clientHeight || 0
+        viewPortRef.current?.clientHeight || 0,
+        itemHeight || 0
       );
 
       setStartIndex(() => (startIndex > 2 ? startIndex - 2 : startIndex));
@@ -60,21 +71,27 @@ export const ViewPortList: FC<ListProps> = ({ items }) => {
   }, []);
 
   return (
-    <Container ref={viewPortRef}>
+    <Container ref={viewPortRef} width={width} height={height}>
       <StyledList ref={listRef}>
         {items.slice(startIndex, endIndex).map((item, index) => (
-          <ListItem key={item} top={(startIndex + index) * 200}>
-            {item}
-          </ListItem>
+          <StyledItem
+            key={item}
+            style={{ transform: `translateY(${startIndex * itemHeight}px)` }}
+          >
+            {cloneElement(children, {
+              style: { height: itemHeight },
+              children: item,
+            })}
+          </StyledItem>
         ))}
       </StyledList>
     </Container>
   );
 };
 
-const Container = styled.div`
-    height: 100vh;
-    width: 100%;
+const Container = styled.div<{ width?: number; height?: number }>`
+    height: ${({ height }) => (height ? `${height}px` : "100vh")};
+    width: ${({ width }) => (width ? `${width}px` : "100%")};
     overflow-y: scroll;
     background-color: black;
 }`;
@@ -83,4 +100,8 @@ const StyledList = styled.ul`
   position: relative;
   margin: 0;
   width: 100%;
+`;
+
+const StyledItem = styled.li`
+  position: relative;
 `;
