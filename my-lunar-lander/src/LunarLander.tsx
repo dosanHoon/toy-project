@@ -272,7 +272,9 @@ const LunarLander: React.FC = () => {
       if (status === "success" || status === "crash") {
         ctx.fillStyle = status === "success" ? "#7cff7c" : "#ff6b6b";
         ctx.font = "24px monospace";
-        ctx.fillText(status === "success" ? "착륙 성공! [R/Space] 재시작" : "충돌! [R/Space] 재시작", 130, 90);
+        const msg = status === "success" ? "착륙 성공! [R/Space] 재시작" : "충돌! [R/Space] 재시작";
+        const textW = ctx.measureText(msg).width;
+        ctx.fillText(msg, (WIDTH - textW) / 2, HEIGHT / 2);
       }
     };
 
