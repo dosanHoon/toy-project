@@ -288,7 +288,7 @@ const LunarLander: React.FC = () => {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <h2 style={{ margin: 8 }}>Lunar Lander 🚀</h2>
+      <h2 style={{ margin: 8 }}>Lunar Lander <img src="/poster.jpg" alt="poster" width={100}/></h2>
       <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 8 }}>
         <button onClick={resetGame}>Restart (R/Space)</button>
         <button onClick={onFullscreen}>Fullscreen</button>
